@@ -46,7 +46,9 @@
     # Hardware-related tools
     sdparm hdparm dmraid smartmontools pciutils usbutils
     # Secure key management
-    gnupg pass zbar qrencoder
+    gnupg pass
+    # QR code
+    zbar qrencode
   ];
 
   environment.noXlibs = true;
