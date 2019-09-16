@@ -1,2 +1,36 @@
-# secure-setup
-Secure setup: encrypted USB drive, GnuPG, YubiKey and related setup
+# Secure Setup for Key Management
+
+*WARNING: this is a work-in-progress. Follow it at your own risk!*
+
+
+## 1. Create a USB drive
+
+The `mkusb.sh` script is used to create an encrypted USB drive.
+It only works on an existing NixOS.
+
+For example, if your USB device is at `/dev/sdc`, run this:
+```
+./mkusb.sh /dev/sdc
+```
+
+Just follow through the steps, and it will format and install a customized NixOS on the USB drive, with encrypted UEFI partition.
+The USB device can be inserted into a separate machine to boot.
+The recommendation is to only boot this USB device on an office machine.
+
+The pitfall of using `nixos-install` in this script is that the hardware detection can be mis-guided (e.g. with respect to swap partition).
+A better way is to follow the approach taken by [`nixos/modules/installer/cd-dvd/iso-image.nix`](https://github.com/NixOS/nixpkgs/blob/master/nixos/modules/installer/cd-dvd/iso-image.nix), and use a pure Nix approach to create a USB image.
+Ideas and suggestions on how to make it work are welcome!
+
+## 2. Create GnuPG keys
+
+## 3. Move secret keys to YubiKey
+
+## 4. Multi-device considerations
+
+## 5. Related setups
+
+### 5.1 GnuPG Agent and SSH
+
+### 5.2 Pass and Browserpass
+
+### 5.3 XBrowserSync
