@@ -5,11 +5,12 @@ USAGE="USAGE: $0 <device>"
 device=$1
 test -z "$device" && echo $USAGE && exit 1
 
+# 0. Ask for a passphrase to encrypt Grub Boot.
 echo type passphrase:
 read -s pass
 
 
-# 1. Partition disk
+# 1. Partition disk (200M EFI system, and the rest Linux).
 disklabel=`uuidgen`
 #sfdisk -d ${device}
 sleep 2
@@ -19,8 +20,6 @@ label-id: $disklabel
 - 200M U *
 - - L -
 EOF
-#name=EFI System, size=200M, type=C12A7328-F81F-11D2-BA4B-00A0C93EC93B, bootable
-#name=Linux System, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4
 
 bootpart=`sfdisk --part-uuid $device 1|tr '[:upper:]' '[:lower:]'`
 rootpart=`sfdisk --part-uuid $device 2|tr '[:upper:]' '[:lower:]'`
