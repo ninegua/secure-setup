@@ -40,22 +40,16 @@
   # $ nix-env -qaP | grep wget
   environment.systemPackages = with pkgs; [
     # Common tools 
-    vim inetutils psmisc curl wget screen socat
+    vim inetutils psmisc curl wget screen socat rsync expect
     # Disk tools
     efibootmgr efivar gptfdisk cryptsetup
     # Hardware-related tools
     sdparm hdparm dmraid smartmontools pciutils usbutils
     # Secure key management
-    gnupg pass
+    yubikey-manager gnupg pass
     # QR code
-    zbar qrencode
+    (zbar.override { enableVideo = false; }) qrencode
   ];
-
-  environment.noXlibs = true;
-  services.nixosManual.enable = false;
-  programs.man.enable = false;
-  programs.info.enable = false;
-  sound.enable = false;
 
   programs.gnupg.agent = { enable = true; enableSSHSupport = true; };
   # Enable the OpenSSH daemon.
