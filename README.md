@@ -10,7 +10,7 @@ The `mkusb.sh` script is used to create an encrypted USB drive.
 
 For example, if your USB drive is at `/dev/sdc`, run this:
 ```
-./mkusb.sh /dev/sdc
+sudo ./mkusb.sh /dev/sdc
 ```
 
 Just follow through the steps, and it will format the USB drive and install a customized NixOS on it, with encrypted UEFI partitions.

@@ -53,6 +53,7 @@ mount $bootdevice /mnt/boot/efi
 dd if=/dev/urandom of=./root-keyfile.bin bs=1024 count=4
 echo -n $pass | cryptsetup luksAddKey $rootdevice root-keyfile.bin -d -
 find root-keyfile*.bin -print0 | sort -z | cpio -o -H newc -R +0:+0 --reproducible --null | gzip -9 > /mnt/boot/initrd.keys.gz
+rm root-keyfile*.bin
 chmod 000 /mnt/boot/initrd.keys.gz
 
 # 6. Configure NixOS installation
@@ -68,6 +69,10 @@ read -s
 sh -c nixos-install
 
 # 8. finish up
+
+# Must move the boot loader to /mnt/boot/efi/boot/bootx64.efi to boot
+mkdir /mnt/boot/efi/boot && cp /mnt/boot/efi/*/grubx64.efi /mnt/boot/efi/boot/bootx64.efi
+
 umount /mnt/boot/efi
 umount /mnt
 vgchange -an vg
