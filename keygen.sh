@@ -1,5 +1,5 @@
 #! /usr/bin/env nix-shell
-#! nix-shell -i bash -p gnupg qrencode zbar rsync
+#! nix-shell -i bash -p gnupg qrencode "(zbar.override { enableVideo = false; })" rsync
 
 USAGE="$0 [name] [email]"
 test -z "$1" && echo $USAGE && exit 1

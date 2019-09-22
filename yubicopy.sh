@@ -21,7 +21,7 @@ else
 fi
 
 GPG_ARGS="--batch --yes --pinentry-mode loopback"
-test12345=`echo 12345|gpg --passphrase $PASS $GPG_ARGS -q -r "$FULLNAME" -e|gpg --passphrase $PASS $GPG_ARGS -q -d`
+test12345=`echo 12345|gpg --passphrase "$PASS" $GPG_ARGS -q -r "$FULLNAME" -e|gpg --passphrase "$PASS" $GPG_ARGS -q -d`
 test "$test12345" != "12345" && echo "Cannot encrypt/decrypt (wrong PASS?). Abort!" && exit 1
 
 # Check if subkeys exist

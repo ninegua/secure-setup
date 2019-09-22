@@ -6,15 +6,19 @@ device=$1
 test -z "$device" && echo $USAGE && exit 1
 
 # 0. Ask for a passphrase to encrypt Grub Boot.
-echo type passphrase:
-read -s pass
-
+if [ -z "$PASS" ]; then
+  echo Please enter a passphrase:
+  read -s PASS
+  echo Please enter it again:
+  read -s PASS_AGAIN
+  test "$PASS" != "$PASS_AGAIN" && echo Passphrase does not match. Abort! && exit 1
+fi
 
 # 1. Partition disk (200M EFI system, and the rest Linux).
 disklabel=`uuidgen`
 #sfdisk -d ${device}
 sleep 2
-sfdisk ${device} <<EOF
+sfdisk -w always ${device} <<EOF
 label: gpt
 label-id: $disklabel
 - 200M U *
@@ -30,8 +34,8 @@ rootdevice=`readlink -f /dev/disk/by-partuuid/$rootpart`
 echo $bootdevice $rootdevice
 
 # 2. Create encrypted LUKS device
-echo -n $pass | cryptsetup luksFormat -q -c aes-xts-plain64 -s 256 -h sha512 $rootdevice -d -
-echo -n $pass | cryptsetup luksOpen $rootdevice crypted-nixos -d -
+echo -n "$PASS" | cryptsetup luksFormat -q -c aes-xts-plain64 -s 256 -h sha512 $rootdevice -d -
+echo -n "$PASS" | cryptsetup luksOpen $rootdevice crypted-nixos -d -
 
 
 # 3. Setup LVM  (TODO: fix the label root to avoid conflict)
@@ -51,7 +55,7 @@ mount $bootdevice /mnt/boot/efi
 
 # 6. Dump key file into /mnt/boot
 dd if=/dev/urandom of=./root-keyfile.bin bs=1024 count=4
-echo -n $pass | cryptsetup luksAddKey $rootdevice root-keyfile.bin -d -
+echo -n "$PASS" | cryptsetup luksAddKey $rootdevice root-keyfile.bin -d -
 find root-keyfile*.bin -print0 | sort -z | cpio -o -H newc -R +0:+0 --reproducible --null | gzip -9 > /mnt/boot/initrd.keys.gz
 rm root-keyfile*.bin
 chmod 000 /mnt/boot/initrd.keys.gz
@@ -62,16 +66,17 @@ rootuuid=`lsblk -o UUID -d -n $rootdevice`
 cat nixos-configuration.nix|sed -e "s/ROOTDEVICEUUID/${rootuuid}/" > /mnt/etc/nixos/configuration.nix
 
 # 7. Install nixos (will ask for root password)
-echo Press ENTER to continue NixOS installation on $device.
-echo Or switch to a different terminal to edit /mnt/etc/nixos/configurations.nix
-echo and hardware-configure.nix before continuing...
+echo
+echo Press ENTER to install NixOS on $device, or edit configurations.nix and hardware-configure.nix under /mnt/etc/nixos before continuing...
 read -s
 sh -c nixos-install
 
 # 8. finish up
+mkdir -p /mnt/usr/bin/
+install keygen.sh yubicopy.sh /mnt/usr/bin
 
 # Must move the boot loader to /mnt/boot/efi/boot/bootx64.efi to boot
-mkdir /mnt/boot/efi/boot && cp /mnt/boot/efi/*/grubx64.efi /mnt/boot/efi/boot/bootx64.efi
+mkdir /mnt/boot/efi/EFI/boot && cp /mnt/boot/efi/EFI/*/grubx64.efi /mnt/boot/efi/EFI/boot/bootx64.efi
 
 umount /mnt/boot/efi
 umount /mnt
