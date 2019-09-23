@@ -34,10 +34,8 @@
   networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
   # Set your time zone.
-  time.timeZone = "US/Pacific";
+  # time.timeZone = "US/Pacific";
 
-  # List packages installed in system profile. To search by name, run:
-  # $ nix-env -qaP | grep wget
   environment.systemPackages = with pkgs; [
     # Common tools 
     vim inetutils psmisc curl wget screen socat rsync expect
@@ -52,8 +50,8 @@
   ];
 
   programs.gnupg.agent = { enable = true; enableSSHSupport = true; };
-  # Enable the OpenSSH daemon.
   services.openssh.enable = true;
+  services.pcscd.enable = true;
   system.stateVersion = "19.03";
   nix = {
     binaryCaches = [ "https://cache.nixos.org/" ];
