@@ -77,3 +77,18 @@ gpgconf --kill gpg-agent
 export GNUPGHOME=$GNUPGCOPY
 gpg --list-secret-keys
 echo All subkeys are in GNUPGHOME=$GNUPGHOME
+
+echo 5. Export public key to /mnt/data
+test ! -d /mnt/data && echo /mnt/data does not exist. Abort! && exit 1
+IMPORT_SCRIPT=/mnt/data/gpg-import.sh
+echo "gpg --import <<END" > $IMPORT_SCRIPT
+gpg -a --export $masterkey >> $IMPORT_SCRIPT
+echo END >> $IMPORT_SCRIPT
+echo "gpg --import-ownertrust <<END" >> $IMPORT_SCRIPT
+gpg --export-ownertrust >> $IMPORT_SCRIPT
+echo END >> $IMPORT_SCRIPT
+gpg -a --export "$masterkey" > /mnt/data/"${NAME} Keys.gpg"
+echo Created import script at "$IMPORT_SCRIPT"
+auth_subkey=`gpg --list-keys --with-colons "$NAME"|sed -z -e 's/\nfpr/fpr/g'|grep sub|grep -v nistp|cut -d: -f12,28|grep ^a|cut -d: -f2|tail -n1`
+gpg --export-ssh-key "$auth_subkey" > /mnt/data/gpg-auth-key.pub
+echo Exported auth public subkey for OpenSSH at /mnt/data/gpg-auth-key.pub
