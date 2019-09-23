@@ -7,10 +7,12 @@ test -z "$device" && echo $USAGE && exit 1
 
 # 0. Ask for a passphrase to encrypt Grub Boot.
 if [ -z "$PASS" ]; then
-  echo Please enter a passphrase:
+  echo -n Please enter a passphrase:
   read -s PASS
-  echo Please enter it again:
+  echo
+  echo -n Please enter it again:
   read -s PASS_AGAIN
+  echo
   test "$PASS" != "$PASS_AGAIN" && echo Passphrase does not match. Abort! && exit 1
 fi
 
@@ -22,16 +24,19 @@ sfdisk -w always ${device} <<EOF
 label: gpt
 label-id: $disklabel
 - 200M U *
+- 500M EBD0A0A2-B9E5-4433-87C0-68B6B72699C7 -
 - - L -
 EOF
 
 bootpart=`sfdisk --part-uuid $device 1|tr '[:upper:]' '[:lower:]'`
-rootpart=`sfdisk --part-uuid $device 2|tr '[:upper:]' '[:lower:]'`
+datapart=`sfdisk --part-uuid $device 2|tr '[:upper:]' '[:lower:]'`
+rootpart=`sfdisk --part-uuid $device 3|tr '[:upper:]' '[:lower:]'`
 # wait a moment for the device to appear
 sleep 2
 bootdevice=`readlink -f /dev/disk/by-partuuid/$bootpart`
+datadevice=`readlink -f /dev/disk/by-partuuid/$datapart`
 rootdevice=`readlink -f /dev/disk/by-partuuid/$rootpart`
-echo $bootdevice $rootdevice
+echo $bootdevice $datadevice $rootdevice
 
 # 2. Create encrypted LUKS device
 echo -n "$PASS" | cryptsetup luksFormat -q -c aes-xts-plain64 -s 256 -h sha512 $rootdevice -d -
@@ -46,12 +51,15 @@ vgrootdevice=/dev/vg/root
 
 # 4. Format partitions
 mkfs.fat -F 32 $bootdevice
+mkfs.vfat -n KEYDATA -F 32 $datadevice
 mkfs.ext4 -L root $vgrootdevice
 
 # 5. Mount /mnt
 mount $vgrootdevice /mnt
 mkdir -p /mnt/boot/efi
 mount $bootdevice /mnt/boot/efi
+mkdir -p /mnt/mnt/data
+mount $datadevice /mnt/mnt/data
 
 # 6. Dump key file into /mnt/boot
 dd if=/dev/urandom of=./root-keyfile.bin bs=1024 count=4
@@ -78,6 +86,7 @@ install keygen.sh yubicopy.sh /mnt/usr/bin
 # Must move the boot loader to /mnt/boot/efi/boot/bootx64.efi to boot
 mkdir /mnt/boot/efi/EFI/boot && cp /mnt/boot/efi/EFI/*/grubx64.efi /mnt/boot/efi/EFI/boot/bootx64.efi
 
+umount /mnt/mnt/data
 umount /mnt/boot/efi
 umount /mnt
 vgchange -an vg
