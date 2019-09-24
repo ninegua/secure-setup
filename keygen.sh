@@ -80,9 +80,11 @@ echo All subkeys are in GNUPGHOME=$GNUPGHOME
 
 echo 5. Export public key to /mnt/data
 test ! -d /mnt/data && echo /mnt/data does not exist. Abort! && exit 1
+EXPORTED_KEY_FILE=/mnt/data/public-keys.gpg
+gpg -a --export $masterkey > $EXPORTED_KEY_FILE
 IMPORT_SCRIPT=/mnt/data/gpg-import.sh
 echo "gpg --import <<END" > $IMPORT_SCRIPT
-gpg -a --export $masterkey >> $IMPORT_SCRIPT
+cat $EXPORTED_KEY_FILE >> $IMPORT_SCRIPT
 echo END >> $IMPORT_SCRIPT
 echo "gpg --import-ownertrust <<END" >> $IMPORT_SCRIPT
 gpg --export-ownertrust >> $IMPORT_SCRIPT
