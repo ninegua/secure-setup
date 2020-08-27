@@ -111,6 +111,8 @@ To import public keys automatically, just copy the above mentioned `/mnt/data/gp
 
 To import public keys manually, you may copy the above mentioned `/mnt/data/public-keys.gpg` to a target machine, for use with a GPG compatible software such as [Gpg4Win], or [OpenKeyChain] on Android phones.
 
+To switch yubikeys, after inserting the new yubikey, use `gpg-connect-agent "scd serialno" "learn --force" /bye` to update the keyid with gpg so the keypairs are now associated with the new yubikey.
+
 ## 5. Related setups
 
 ### 5.1 GnuPG Agent and SSH
@@ -119,6 +121,19 @@ To import public keys manually, you may copy the above mentioned `/mnt/data/publ
 
 ### 5.3 XBrowserSync
 
+### 5.4 Yubikey Manager (`ykman`)
+
+To enable/disable touch protection, use the following command:
+
+```
+> ykman openpgp set-touch aut -h
+Usage: ykman openpgp set-touch [OPTIONS] KEY POLICY
+
+  Set touch policy for OpenPGP keys.
+
+  KEY     Key slot to set (sig, enc, aut or att).
+  POLICY  Touch policy to set (on, off, fixed, cached or cached-fixed).
+```
 
 [GnuPG]: https://gnupg.org
 [YubiKey]: https://www.yubico.com
