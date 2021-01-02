@@ -113,7 +113,28 @@ To import public keys manually, you may copy the above mentioned `/mnt/data/publ
 
 To switch yubikeys, after inserting the new yubikey, use `gpg-connect-agent "scd serialno" "learn --force" /bye` to update the keyid with gpg so the keypairs are now associated with the new yubikey.
 
-## 5. Related setups
+## 5. Reset expiry setting
+
+The above setting will use a default expiry time of `1y` (1 year) when creating both master and sub keys.
+When a key expires, you may continue to use it for authentication and decryption if your local GnuPG setup trusts the keys "ultimately", but not for encryption.
+So it is a good idea to set a new expiry time for all keys.
+To do this, you must boot with the USB stick again, login, and then type type following command:
+
+```
+PASS="Your Passphrase" /usr/bin/extend-expiry.sh "Full Name"
+```
+
+As a result of the renewal, a new set of data files will be created in `/mnt/data` (any old files in there will be overwritten).
+They should be loaded onto all devices/machines to refresh their copies of the set of keys (e.g., copy `gpg-import.sh` over and run it).
+
+You may also run `yubicopy.sh` again to refresh the keys on your yubikey.
+But I've found this step unnecessary, since GPG seems to load expiry from local setting, instead of yubikeys.
+
+Again, the default is `1y` (1 year) from the current time on the machine you use.
+This can be overridden with the environment variable `EXPIRE`, e.g., `EXPIRE=2y` will set all keys to expire in 2 years.
+(This variable can also be used with `keygen.sh` above).
+
+## 6. Related setups
 
 ### 5.1 GnuPG Agent and SSH
 

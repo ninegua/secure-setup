@@ -81,7 +81,7 @@ sh -c nixos-install
 
 # 8. finish up
 mkdir -p /mnt/usr/bin/
-install keygen.sh yubicopy.sh /mnt/usr/bin
+install keygen.sh yubicopy.sh extend-expiry.sh /mnt/usr/bin
 
 # Must move the boot loader to /mnt/boot/efi/boot/bootx64.efi to boot
 mkdir /mnt/boot/efi/EFI/boot && cp /mnt/boot/efi/EFI/*/grubx64.efi /mnt/boot/efi/EFI/boot/bootx64.efi
