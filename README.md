@@ -109,7 +109,7 @@ To use the YubiKey on your daily machines or mobile phones, you'll have to first
 
 To import public keys automatically, just copy the above mentioned `/mnt/data/gpg-import.sh` script to a target machine and run it, assuming `gpg` command is in `PATH`.
 
-To import public keys manually, you may copy the above mentioned `/mnt/data/public-keys.gpg` to a target machine, for use with a GPG compatible software such as [Gpg4Win], or [OpenKeyChain] on Android phones.
+To import public keys manually, you may copy the above mentioned `/mnt/data/public-keys.gpg` to a target machine, for use with a GPG compatible software such as [Gpg4win], or [OpenKeyChain] on Android phones.
 
 To switch yubikeys, after inserting the new yubikey, use `gpg-connect-agent "scd serialno" "learn --force" /bye` to update the keyid with gpg so the keypairs are now associated with the new yubikey.
 
@@ -136,13 +136,38 @@ This can be overridden with the environment variable `EXPIRE`, e.g., `EXPIRE=2y`
 
 ## 6. Related setups
 
-### 5.1 GnuPG Agent and SSH
+### 6.1 GnuPG Agent and SSH
 
-### 5.2 Pass and Browserpass
+To use yubikey to authenticate SSH acess, we need to setup both server and client sides.
 
-### 5.3 XBrowserSync
+**Server side**
 
-### 5.4 Yubikey Manager (`ykman`)
+- Copy or append the content of `gpg-auth-key.pub` (as a single line) from the data partition of the USB drive to the file `$HOME/.ssh/authorized_keys`.
+
+**Linux/Mac client**
+
+- Install `gpg` and setup `gpg-agent` by adding `enable-ssh-support` to `$HOME/.gnupg/gpg-agent.conf`.
+- Install your GPG public keys by running `gpg-import.sh` from the data partition of the USB drive.
+- `export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)` to setup `SSH_AUTH_SOCK` environment.
+
+Now you may `ssh` to the server, which may prompt for entering yubikey pin, but should not prompt for SSH password.
+
+**Windows client**
+
+- Install [Gpg4win], which bundles both [GnuPG] commands and [Kleopatra], a GUI frontend.
+- Use [Kleopatra] to import the public keys from the file `enable-ssh-support` from the data partition of the USB drive.
+- When you plug in the yubikey, it should show up in `Keopatra -> Tool -> Manage Smartcards` tab.
+- Add `enable-ssh-support` and `enable-putty-support` (2 lines) to `C:\Users\YourUserName\Roaming\gnupg\gpg-agent.conf` file.
+- Download and install [wsl-ssh-pageant], and follow the instructions there to set `SSH_AUTH_SOCK` environment variable for your shell. I put the following line in a bat file, and run it on Windows startup:
+    start /B C:\path\to\wsl-ssh-pageant-amd64-gui.exe -force -winssh ssh-pageant -systray -wsl C:\path-to\ssh\agent.sock
+
+If necessary, run `gpg-connect-agent /bye` to restart gpg-agent on the client side.
+
+### 6.2 Pass and Browserpass
+
+### 6.3 XBrowserSync
+
+### 6.4 Yubikey Manager (`ykman`)
 
 To enable/disable touch protection, use the following command:
 
@@ -156,9 +181,11 @@ Usage: ykman openpgp set-touch [OPTIONS] KEY POLICY
   POLICY  Touch policy to set (on, off, fixed, cached or cached-fixed).
 ```
 
+
+
 [GnuPG]: https://gnupg.org
 [YubiKey]: https://www.yubico.com
 [NixOS]: https://nixos.org
 [Gpg4win]: https://www.gpg4win.org
 [OpenKeyChain]: https://www.openkeychain.org
-
+[wsl-ssh-pageant]: https://github.com/benpye/wsl-ssh-pageant
