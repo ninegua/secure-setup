@@ -158,8 +158,12 @@ Now you may `ssh` to the server, which may prompt for entering yubikey pin, but 
 - Use [Kleopatra] to import the public keys from the file `enable-ssh-support` from the data partition of the USB drive.
 - When you plug in the yubikey, it should show up in `Keopatra -> Tool -> Manage Smartcards` tab.
 - Add `enable-ssh-support` and `enable-putty-support` (2 lines) to `C:\Users\YourUserName\Roaming\gnupg\gpg-agent.conf` file.
-- Download and install [wsl-ssh-pageant], and follow the instructions there to set `SSH_AUTH_SOCK` environment variable for your shell. I put the following line in a bat file, and run it on Windows startup:
-    start /B C:\path\to\wsl-ssh-pageant-amd64-gui.exe -force -winssh ssh-pageant -systray -wsl C:\path-to\ssh\agent.sock
+- Download and install [wsl-ssh-pageant], and follow the instructions there to set `SSH_AUTH_SOCK` environment variable for your shell.
+- If desirable, you can run `wsl-ssh-pageant` by putting the following line in a `wsl-ssh-pageant.bat` file and run it on Windows startup:
+
+```
+start /B C:\path\to\wsl-ssh-pageant-amd64-gui.exe -force -winssh ssh-pageant -systray -wsl C:\path\to\ssh-agent.sock
+```
 
 If necessary, run `gpg-connect-agent /bye` to restart gpg-agent on the client side.
 
