@@ -3,8 +3,9 @@
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
 { config, pkgs, ... }:
-
-{
+let
+  keysmith = import ./keysmith.nix { inherit pkgs; };
+in {
   imports = [ ./hardware-configuration.nix ];
 
   # Use the systemd-boot EFI boot loader.
@@ -47,12 +48,14 @@
     yubikey-manager gnupg pass
     # QR code
     (zbar.override { enableVideo = false; }) qrencode
+    # Internet Computer key tool
+    keysmith
   ];
 
   programs.gnupg.agent = { enable = true; enableSSHSupport = true; };
   services.openssh.enable = true;
   services.pcscd.enable = true;
-  system.stateVersion = "19.03";
+  system.stateVersion = "20.09";
   nix = {
     binaryCaches = [ "https://cache.nixos.org/" ];
     binaryCachePublicKeys = [ "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=" ];
