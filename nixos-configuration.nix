@@ -49,7 +49,7 @@ in {
     # QR code
     (zbar.override { enableVideo = false; }) qrencode
     # Internet Computer key tool
-    keysmith
+    keysmith openssl
   ];
 
   programs.gnupg.agent = { enable = true; enableSSHSupport = true; };
